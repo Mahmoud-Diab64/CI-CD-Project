@@ -1,0 +1,18 @@
+name : Node App CI/CD GitOps Pipeline
+on :
+  push: 
+    branches:
+      - main 
+jobs:
+  test-and-build:
+    name: test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4.4.0
+      - name: setup node js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Dependencies
+        run: npm install
