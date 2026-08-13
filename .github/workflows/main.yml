@@ -1,18 +1,48 @@
-name : Node App CI/CD GitOps Pipeline
-on :
-  push: 
+name: Node App CI/CD GitOps Pipeline
+
+on:
+  push:
     branches:
-      - main 
+      - main
+
+env:
+  IMAGE_NAME: ${{ vars.DOCKER_USERNAME }}/node-app
+
 jobs:
-  test-and-build:
-    name: test and build
+  install:
+    name: Install Dependencies
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4.4.0
-      - name: setup node js
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install Dependencies
         run: npm install
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t $IMAGE_NAME:${{ github.sha }} .
+
+      - name: Show Docker Images
+        run: docker images
